@@ -36,4 +36,5 @@ while True:
     for tx_hash in latest_block['transactions']:
         if is_airdrop(tx_hash):
             transfer_airdrops()
-    w3.eth.waitForTransactionReceipt('latest')
+    latest_block_hex = hex(latest_block.number)
+    w3.eth.waitForTransactionReceipt(latest_block_hex)
