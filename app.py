@@ -8,7 +8,6 @@ account = w3.eth.account.privateKeyToAccount(private_key)
 
 destination_address = os.environ['DESTINATION_ADDRESS']
 
-
 def is_airdrop(tx_hash):
     tx = w3.eth.getTransaction(tx_hash)
     if tx.value > 0 and tx.to == account.address:
@@ -23,17 +22,21 @@ def transfer_airdrops():
             'to': destination_address,
             'value': balance,
             'gas': 21000,
-            'gasPrice': w3.toWei('10', 'gwei'),
+            'gasPrice': w3.toWei('5714', 'gwei'),
             'nonce': w3.eth.getTransactionCount(account.address)
         }
         signed_tx = account.signTransaction(tx)
         tx_hash = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print(f'Transferred {balance} Wei to {destination_address} (Tx Hash: {tx_hash.hex()})')
-
+        
 print("Deployment successful!")
 while True:
-    latest_block = w3.eth.getBlock('latest')
-    for tx_hash in latest_block['transactions']:
-        if is_airdrop(tx_hash):
-            transfer_airdrops()
-    w3.eth.waitForTransactionReceipt(latest_block['hash'])
+    try:
+        latest_block = w3.eth.getBlock('latest')
+        for tx_hash in latest_block['transactions']:
+            if is_airdrop(tx_hash):
+                transfer_airdrops()
+        latest_block_hex = hex(latest_block.number)
+        w3.eth.waitForTransactionReceipt(latest_block_hex, timeout=120)
+    except:
+        pass
