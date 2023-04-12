@@ -29,6 +29,7 @@ def transfer_airdrops():
         signed_tx = account.signTransaction(tx)
         tx_hash = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print(f'Transferred {balance} Wei to {destination_address} (Tx Hash: {tx_hash.hex()})')
+        
 print("Deployment successful!")
 while True:
     latest_block = w3.eth.getBlock('latest')
