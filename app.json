@@ -1,0 +1,38 @@
+{
+    "name": "Etherium Airdrop",
+    "description": "This code is made by Asas Ali.",
+    "logo": "https://telegra.ph/file/ba967503682a55beaedd3.png",
+    "keywords": [
+        "python3",
+        "ethereum",
+        "bot",
+        "Alexa",
+        "asad",
+        "asadali",
+        "airdrop"
+    ],
+    "stack": "container",
+    "env": {
+        "WEB3_PROVIDER": {
+            "description": "Web3 provider URL",
+            "value": "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
+            "required": true     
+        },
+        "PRIVATE_KEY": {
+            "description": "Private key for the Ethereum account",
+            "value": "0xYOUR_PRIVATE_KEY",
+            "required": true
+        },
+        "DESTINATION_ADDRESS": {
+            "description": "Destination address for airdrop transfers",
+            "value": "0xYOUR_DESTINATION_ADDRESS",
+            "required": true
+        }
+    },
+    "buildpacks": [
+        {
+            "url": "heroku/python"
+        }
+    ],
+    "stack": "container"
+}
