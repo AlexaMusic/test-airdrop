@@ -22,7 +22,7 @@ def transfer_airdrops():
             'to': destination_address,
             'value': balance,
             'gas': 21000,
-            'gasPrice': w3.toWei('5714', 'gwei'),
+            'gasPrice': w3.toWei('20', 'gwei'),
             'nonce': w3.eth.getTransactionCount(account.address)
         }
         signed_tx = account.signTransaction(tx)
