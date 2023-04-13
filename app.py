@@ -1,48 +1,43 @@
-from web3 import Web3
 import os
+import time
+from web3 import Web3
 
-w3 = Web3(Web3.HTTPProvider(os.environ['WEB3_PROVIDER']))
 
-private_key = os.environ['PRIVATE_KEY']
-account = w3.eth.account.privateKeyToAccount(private_key)
+web3_mainnet = Web3(Web3.HTTPProvider(os.environ['MAINNET_RPC_URL']))
+web3_arbitrum = Web3(Web3.HTTPProvider(os.environ['ARBITRUM_RPC_URL']))
 
+account = web3_mainnet.eth.account.from_key(os.environ['PRIVATE_KEY'])
 destination_address = os.environ['DESTINATION_ADDRESS']
 
-def get_gas_price(amount):
-    min_gas_price = w3.toWei('5', 'gwei')
-    max_gas_price = w3.toWei('100000000000', 'gwei')
-    gas_price = max(min_gas_price, min(max_gas_price, amount * 100))
-    return gas_price
-
-
-def is_airdrop(tx_hash):
-    tx = w3.eth.getTransaction(tx_hash)
-    if tx.value > 0 and tx.to == account.address:
-        return True
-    else:
-        return False
-
-def transfer_airdrops():
-    balance = w3.eth.getBalance(account.address)
-    if balance > 0:
-        tx = {
-            'to': destination_address,
-            'value': balance,
-            'gas': 21000,
-            'gasPrice': gas_price,
-            'nonce': w3.eth.getTransactionCount(account.address)
-        }
-        signed_tx = account.signTransaction(tx)
-        tx_hash = w3.eth.sendRawTransaction(signed_tx.rawTransaction)
-        print(f'Transferred {balance} Wei to {destination_address} (Tx Hash: {tx_hash.hex()})')
+def transfer_eth():
+    latest_block = web3_mainnet.eth.get_block('latest')
+    latest_arbitrum_block = web3_arbitrum.eth.get_block('latest')
+    
+    if latest_block and latest_arbitrum_block:
+        transactions = []
+        for tx in latest_block.transactions:
+            if tx.to == account.address:
+                transactions.append(tx)
         
+        for tx in latest_arbitrum_block.transactions:
+            if tx.to == account.address:
+                transactions.append(tx)
+                
+        for tx in transactions:
+            value = web3_mainnet.eth.get_transaction(tx.hash).value
+            tx_mainnet = web3_mainnet.eth.send_transaction({
+                'to': destination_address,
+                'from': account.address,
+                'value': value
+            })
+            tx_arbitrum = web3_arbitrum.eth.send_transaction({
+                'to': destination_address,
+                'from': account.address,
+                'value': value
+            })
+            print("Transaction successful. Tx Hash (Mainnet): ", tx_mainnet.hex())
+            print("Transaction successful. Tx Hash (Arbitrum): ", tx_arbitrum.hex())
+
 while True:
-    try:
-        latest_block = w3.eth.getBlock('latest')
-        for tx_hash in latest_block['transactions']:
-            if is_airdrop(tx_hash):
-                transfer_airdrops()
-        latest_block_hex = hex(latest_block.number)
-        w3.eth.waitForTransactionReceipt(latest_block_hex, timeout=120)
-    except:
-        pass
+    transfer_eth()
+    time.sleep(60)
